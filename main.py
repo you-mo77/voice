@@ -1,5 +1,6 @@
 import numpy as np
 import PySimpleGUI as sg
+import soundfile as sf
 
 # gui生成
 def gui():
@@ -20,6 +21,10 @@ def gui():
         if event == sg.WIN_CLOSED:
             break
 
+# 音声読み取り
+def read_sound(path:str):
+
+
 
 # メイン
 def main():
@@ -27,7 +32,7 @@ def main():
     print()
 
     # gui表示
-    gui()
+    #gui()
 
 # 実行部分
 if __name__ == "__main__":
