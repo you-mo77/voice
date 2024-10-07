@@ -1,6 +1,7 @@
 import numpy as np
 import PySimpleGUI as sg
 import soundfile as sf
+import librosa as lib
 
 # gui生成
 def gui():
@@ -21,9 +22,12 @@ def gui():
         if event == sg.WIN_CLOSED:
             break
 
-# 音声読み取り
+# 音声読み取り、解析
 def read_sound(path:str):
+    # 音声データ読み込み
+    data, fs = lib.load(path)
 
+    # 
 
 
 # メイン
