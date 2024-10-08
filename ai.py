@@ -18,8 +18,21 @@ def create_spectrogram(path:str):
 
 # スペクトログラム表示[スペクトログラム(np配列), サンプリング周波数]
 def show_spectrogram(spec_db:np.ndarray, sr:int):
-    
+    # グラフ作成
+    plt.figure()
 
+    # スペクトログラム描画
+    lib.display.specshow(spec_db, sr=sr, x_axis="time", y_axis="mel")
+
+    # 詳細追加
+    plt.rcParams["font.family"] = "Meiryo"
+    plt.title("Mel-frequency spectrogram")
+    plt.tight_layout()
+
+    # 表示
+    plt.show()
+
+    return 
 
 # 変数の詳細を出力(テスト用)[何らかの変数]
 def test_output(output_variable):
@@ -32,8 +45,8 @@ def test_output(output_variable):
 # テスト関数(好きにいじる)
 def test():
     spec_db, sr = create_spectrogram(r"C:\Users\重岡拓郎\Desktop\code\voice\sound_file\iyowa\1000年生きてる.wav")
-    test_output(spec_db)
-
+    #test_output(spec_db)
+    show_spectrogram(spec_db, sr)
 
 # メイン関数
 def main():
@@ -41,5 +54,5 @@ def main():
 
 # 開始部
 if __name__ == "__main__":
-    #test()
+    test()
     main()
