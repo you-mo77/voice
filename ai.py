@@ -4,6 +4,22 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
+#---------------------------------------------------------------------------------#
+
+# 各アーティストのクラス (これに対してai処理を行うべき？)
+class Artist:
+    # イニシャライザ [アーティスト名]
+    def __init__(self, name):
+        self.name = name      # アーティスト名
+        self.audio_files = [] # AudioFileインスタンスを随時格納していく
+
+    # AudioFileインスタンスをaudio_filesに追加 [AudioFileインスタンス]
+    def add_audiofile(self, audiofile):
+        # リスト追加(np配列ではない)
+        self.audio_files.append(audiofile)
+
+#---------------------------------------------------------------------------------#
+
 # 各音声ファイルのクラス
 class AudioFile:
     # イニシャライザ [アーティスト名、曲名、パス] 曲名に関してはパスから引き出せるかも
@@ -48,6 +64,8 @@ class AudioFile:
 
         # 表示
         plt.show()
+
+#---------------------------------------------------------------------------------#
 
 # 変数の詳細を出力(テスト用)[何らかの変数]
 def test_output(output_variable):
