@@ -6,17 +6,37 @@ from sklearn.preprocessing import StandardScaler
 
 #---------------------------------------------------------------------------------#
 
-# 各アーティストのクラス (これに対してai処理を行うべき？)
+#---------------------------------------------------------------------------------#
+
+# 各アーティストのクラス (これに対してai処理を行うべき？) ()
 class Artist:
     # イニシャライザ [アーティスト名]
     def __init__(self, name):
         self.name = name      # アーティスト名
-        self.audio_files = [] # AudioFileインスタンスを随時格納していく
+        self.audio_files = [] # AudioFileインスタンスをadd_audiofileで格納していく
 
-    # AudioFileインスタンスをaudio_filesに追加 [AudioFileインスタンス]
+    # AudioFileインスタンスをaudio_filesに追加 (基本的にall_addから呼び出すからメソッドにする必要ない...?)[AudioFileインスタンス]
     def add_audiofile(self, audiofile):
         # リスト追加(np配列ではない)
         self.audio_files.append(audiofile)
+
+    # pathディレクトリ内のwavをすべてAudioFile化して、それぞれadd_audiofileに与える。要は今のアーティストのArtistを完成させる [アーティストディレクトリまでのパス, アーティストディクレトリパス]
+    def all_add(self, base, path):
+        # パス結合
+        full_path  = os.path.join(base, path)
+
+        # ディクレトリ内のファイル(とディレクトリ)すべてでループ
+        for track in os.listdir(full_path):
+            # .wavファイルかどうかチェックするよ～
+            if track.endswith(".wav"):
+                # 曲名生成(trackが"曲名.wav"の形式なので、".wav"を""に置き換える)
+                track_name = track.replace(".wav", "")
+
+                # 今のtrackのAudioFileインスタンス作成
+                audio = AudioFile(path, track_name, full_path)
+
+                # AudioFileをself.audio_filesに追加していく
+                self.add_audiofile(audio)
 
 #---------------------------------------------------------------------------------#
 
@@ -77,8 +97,8 @@ def test_output(output_variable):
 
 # テスト関数(好きにいじる)
 def test():
-    test_audio = AudioFile("iyowa", "1000年生きてる", r"sound_file\iyowa\1000年生きてる.wav")
-    test_audio.show_spectrogram()
+    a = Artist("iyowa")
+    a.all_add("sound_file", "iyowa")
     
 
 # メイン関数
