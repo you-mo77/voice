@@ -22,7 +22,7 @@ class Artist:
 
     # pathディレクトリ内のwavをすべてAudioFile化して、それぞれadd_audiofileに与える。要は今のアーティストのArtistを完成させる [アーティストディレクトリまでのパス, アーティストディクレトリパス]
     def all_add(self, base, path):
-        # パス結合
+        # パス結合(アーティストディレクトリまでのパス)
         full_path  = os.path.join(base, path)
 
         # ディクレトリ内のファイル(とディレクトリ)すべてでループ
@@ -32,11 +32,18 @@ class Artist:
                 # 曲名生成(trackが"曲名.wav"の形式なので、".wav"を""に置き換える)
                 track_name = track.replace(".wav", "")
 
+                # 曲のパス生成(現在のtrackまでのパス)
+                song_path = os.path.join(full_path, track)
+
                 # 今のtrackのAudioFileインスタンス作成
-                audio = AudioFile(path, track_name, full_path)
+                audio = AudioFile(path, track_name, song_path)
 
                 # AudioFileをself.audio_filesに追加していく
                 self.add_audiofile(audio)
+
+    # AudioFile数出力
+    def print_len(self):
+        print(len(self.audio_files))
 
 #---------------------------------------------------------------------------------#
 
@@ -49,7 +56,7 @@ class AudioFile:
         self.file_path = file_path     # wavファイルパス
         self.sr = None                 # サンプリング周波数
         self.spectrogram = None        # dbスケールのメルスペクトログラム
-
+        
         # 音声ファイル読み込みとスペクトログラム[sr, spectrogram設定]
         self.create_spectrogram()
 
@@ -97,8 +104,25 @@ def test_output(output_variable):
 
 # テスト関数(好きにいじる)
 def test():
-    a = Artist("iyowa")
-    a.all_add("sound_file", "iyowa")
+    iyowa = Artist("iyowa")
+    aoya = Artist("aoya")
+    inabakumori = Artist("inabakumori")
+
+    iyowa.all_add("sound_file", "iyowa")
+    aoya.all_add("sound_file", "aoya")
+    inabakumori.all_add("sound_file", "inabakumori")
+
+    #a = os.path.join("sound_file", "iyowa")
+    #pa = os.path.join(pa, "たぶん終わり.wav")
+
+    #print(pa)
+    #t = AudioFile("iyowa", "たぶん終わり", pa)
+    #print(t.track_name)
+    
+    print(iyowa.print_len())
+    print(aoya.print_len())
+    print(inabakumori.print_len())
+    print(iyowa.audio_files)
     
 
 # メイン関数
