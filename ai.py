@@ -45,6 +45,11 @@ class Artist:
     def print_len(self):
         print(len(self.audio_files))
 
+    # transform_into_standard_spectrogramを全audiofileに実行
+    def all_transform(self):
+        for audio in self.audio_files:
+            audio.transform_into_standard_spectrogram()
+
 #---------------------------------------------------------------------------------#
 
 # 各音声ファイルのクラス
@@ -92,6 +97,10 @@ class AudioFile:
         # 表示
         plt.show()
 
+    def transform_into_standard_spectrogram(self):
+        scaler = StandardScaler()
+        self.spectrogram = scaler.fit_transform(self.spectrogram)
+
 #---------------------------------------------------------------------------------#
 
 # 変数の詳細を出力(テスト用)[何らかの変数]
@@ -105,25 +114,16 @@ def test_output(output_variable):
 # テスト関数(好きにいじる)
 def test():
     iyowa = Artist("iyowa")
-    aoya = Artist("aoya")
-    inabakumori = Artist("inabakumori")
 
     iyowa.all_add("sound_file", "iyowa")
-    aoya.all_add("sound_file", "aoya")
-    inabakumori.all_add("sound_file", "inabakumori")
 
-    #a = os.path.join("sound_file", "iyowa")
-    #pa = os.path.join(pa, "たぶん終わり.wav")
+    iyowa.all_transform()
 
-    #print(pa)
-    #t = AudioFile("iyowa", "たぶん終わり", pa)
-    #print(t.track_name)
+
+
     
-    print(iyowa.print_len())
-    print(aoya.print_len())
-    print(inabakumori.print_len())
-    print(iyowa.audio_files)
-    
+
+#---------------------------------------------------------------------------------#
 
 # メイン関数
 def main():
