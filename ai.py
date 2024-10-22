@@ -132,7 +132,7 @@ class MusicDataset(Dataset):
                 self.data.append(audio.tensor)
                 self.labels.append(artist.name)
         
-    # データローダー作成
+    # データローダー作成(DataLoader:「全データをまとめたリスト と それに対応するラベルのリスト」をもつクラス)
     def make_dataloader(self, batch_size):
         self.dataloader = DataLoader(self, batch_size=batch_size, shuffle=False)
 
@@ -148,6 +148,20 @@ class MusicDataset(Dataset):
             for data in self.dataloader:
                 # データごとに勾配初期化を明示する必要があるっぽい？
                 optimizer.zero_grad()
+
+                # 恐らく x=データ本体 y=ラベル
+                x, y = data
+
+                # 各種データをGPUへ
+                x = x.to(device, dtype=torch.float32)
+                y = y.to(device)
+
+                print(x)
+                print(y)
+                exit()
+
+
+
 
                 
 
@@ -181,6 +195,7 @@ def test():
     print("4")
     train.make_dataloader(32)
     print("5")
+
     # 学習済みモデルをさらに学習(新規データで学習していく 学習済モデルをモデルとして学習していく)
     resnet_model = resnet34(pretrained=True)
     resnet_model.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
@@ -201,7 +216,10 @@ def test():
     # エポック数:全体の学習を何回やるか。「N個のサブセットに分けN回学習をする」を何回やるか。
     epochs = 50
 
-    train.lr_decay()
+    #train.lr_decay()
+
+    # 学習(エラー中)
+    train.model_train(epoch_num=epochs, optimizer=optimizer)
     
 #---------------------------------------------------------------------------------#
 
