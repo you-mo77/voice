@@ -3,9 +3,16 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
+import torch
+import torchvision
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, random_split
+from torchvision.models import resnet34
+import torch.nn as nn
+import torch.optim as optim
+
 
 #---------------------------------------------------------------------------------#
-
 #---------------------------------------------------------------------------------#
 
 # 各アーティストのクラス (これに対してai処理を行うべき？) ()
@@ -49,6 +56,7 @@ class Artist:
     def all_transform(self):
         for audio in self.audio_files:
             audio.transform_into_standard_spectrogram()
+            audio.transform_into_tensor()
 
 #---------------------------------------------------------------------------------#
 
@@ -61,6 +69,7 @@ class AudioFile:
         self.file_path = file_path     # wavファイルパス
         self.sr = None                 # サンプリング周波数
         self.spectrogram = None        # dbスケールのメルスペクトログラム
+        self.tensor = None             # cnn用のspectrogramをtensor型に変換したもの 最初はNoneのまま
         
         # 音声ファイル読み込みとスペクトログラム[sr, spectrogram設定]
         self.create_spectrogram()
@@ -97,10 +106,52 @@ class AudioFile:
         # 表示
         plt.show()
 
+    # スペクトログラム正規化(基本的にArtist.all_transformから呼び出す)
     def transform_into_standard_spectrogram(self):
         scaler = StandardScaler()
         self.spectrogram = scaler.fit_transform(self.spectrogram)
 
+    # cnn用にスペクトログラムをtensorに変換
+    def transform_into_tensor(self):
+        trans = torchvision.transforms.ToTensor()
+        self.tensor = trans(np.array(self.spectrogram))
+
+#---------------------------------------------------------------------------------#
+
+# 自作データセット型(torch.utils.data.Datasetを継承) [Artistのリスト]
+class MusicDataset(Dataset):
+    def __init__(self, artist_list):
+        self.data = []
+        self.labels = []
+        self.dataloader = None
+
+
+        # 曲とラベルを集約(ここでのラベルはアーティスト名)
+        for artist in artist_list:
+            for audio in artist.audio_files:
+                self.data.append(audio.tensor)
+                self.labels.append(artist.name)
+        
+    # データローダー作成
+    def make_dataloader(self, batch_size):
+        self.dataloader = DataLoader(self, batch_size=batch_size, shuffle=False)
+
+    # 学習
+    def model_train(self, epoch_num, optimizer):
+        losses = []
+
+        for epoch in range(epoch_num):
+
+            # 学習
+            train_losses = 0
+
+            for data in self.dataloader:
+                # データごとに勾配初期化を明示する必要があるっぽい？
+                optimizer.zero_grad()
+
+                
+
+            
 #---------------------------------------------------------------------------------#
 
 # 変数の詳細を出力(テスト用)[何らかの変数]
@@ -113,16 +164,45 @@ def test_output(output_variable):
 
 # テスト関数(好きにいじる)
 def test():
+
     iyowa = Artist("iyowa")
-
+    inabakumori = Artist("inabakumori")
+    aoya = Artist("aoya")
+    print("1")
     iyowa.all_add("sound_file", "iyowa")
-
+    inabakumori.all_add("sound_file", "inabakumori")
+    aoya.all_add("sound_file", "aoya")
+    print("2")
     iyowa.all_transform()
+    inabakumori.all_transform()
+    aoya.all_transform()
+    print("3")
+    train = MusicDataset([iyowa, inabakumori, aoya])
+    print("4")
+    train.make_dataloader(32)
+    print("5")
+    # 学習済みモデルをさらに学習(新規データで学習していく 学習済モデルをモデルとして学習していく)
+    resnet_model = resnet34(pretrained=True)
+    resnet_model.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+    resnet_model.fc = nn.Linear(512, 3)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    resnet_model = resnet_model.to(device)
+
+    # 学習率
+    lr = 2e-4
+
+    # 損失関数と最適化手法 (「出力と教師信号の誤差」を損失関数で求め、それをbpして、最適化手法により重み(cnnの場合はフィルタ)更新 今回のadamは学習率も更新してる？)
+    loss_function = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(resnet_model.parameters(), lr=lr)
 
 
+    # バッチサイズ:学習前にデータセットをいくつかのサブセットに分ける。それぞれのサブセットに含まれるデータ数のこと。2^nが望ましい
+    # イテレーション数:データセット全体が学習されるのに必要な学習回数のこと。要は データセットサイズをバッチサイズで割ったもの(の切り上げ？)
+    # エポック数:全体の学習を何回やるか。「N個のサブセットに分けN回学習をする」を何回やるか。
+    epochs = 50
 
+    train.lr_decay()
     
-
 #---------------------------------------------------------------------------------#
 
 # メイン関数
